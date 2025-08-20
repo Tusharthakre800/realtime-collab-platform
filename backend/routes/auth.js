@@ -35,19 +35,8 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    user.isOnline = true;
-    await user.save();
-
+    const user = await User.findOne({ email }).lean();
+    
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your-secret-key', {
       expiresIn: '7d'
     });
