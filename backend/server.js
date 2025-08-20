@@ -18,7 +18,9 @@ const io = socketIo(server, {
     origin: process.env.VITE_API_URL,
     methods: ["GET", "POST"],
     credentials: true,
-    transports: ["websocket", "polling"]
+    transports: ["websocket", "polling"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Authorization"]
   }
 });
 
