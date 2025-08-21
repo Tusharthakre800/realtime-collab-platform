@@ -16,19 +16,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Optimized register route
     const user = new User({ name, email, password });
     await user.save();
-    
-    // Optimized login route - faster password comparison
-    const user = await User.findOne({ email }).lean();
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-    
-    // Faster JWT signing
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { 
-      expiresIn: '7d' 
-    });
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
     
     res.status(201).json({ 
       token, 
