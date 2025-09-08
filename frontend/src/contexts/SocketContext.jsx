@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
     if (loading) return;
     
     if (user) {
-      console.log('Creating socket connection for user:', user.id || user._id);
+      // console.log('Creating socket connection for user:', user.id || user._id);
       
       const newSocket = io(`${import.meta.env.VITE_API_BASE}`, {
         withCredentials: true,
@@ -28,7 +28,7 @@ export const SocketProvider = ({ children }) => {
       });
       
       newSocket.on('connect', () => {
-        console.log('Socket connected successfully:', newSocket.id);
+        // console.log('Socket connected successfully:', newSocket.id);
         const userId = user.id || user._id;
         newSocket.emit('user-online', userId);
         

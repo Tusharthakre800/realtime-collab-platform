@@ -46,7 +46,7 @@ const Home = () => {
       });
   
       socket.on('active-users', (activeUserIds) => {
-        console.log('Active users received:', activeUserIds); // Debug log add करें
+        // console.log('Active users received:', activeUserIds); // Debug log add करें
         setUsers(prevUsers => 
           prevUsers.map(u => ({ ...u, isOnline: activeUserIds.includes(u._id) }))
         );
