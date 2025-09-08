@@ -9,6 +9,19 @@ const DrawingCanvas = ({ roomId, socket }) => {
   const [brushSize, setBrushSize] = useState(2);
   const [isEraser, setIsEraser] = useState(false);
 
+  // ✅ Move stopDrawing function here (component level)
+  const stopDrawing = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    context.beginPath();
+    
+    // Save canvas state after drawing
+    const canvasData = canvas.toDataURL();
+    localStorage.setItem(`canvas-${roomId}`, canvasData);
+  };
+
   useEffect(() => {
     const tl = gsap.timeline();
     tl.fromTo(toolbarRef.current,
@@ -34,12 +47,12 @@ const DrawingCanvas = ({ roomId, socket }) => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
 
-      // Restore canvas state
-      context.drawImage(tempCanvas, 0, 0);
-      
-      // Set white background
+      // Set white background first
       context.fillStyle = 'white';
       context.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Then restore canvas state
+      context.drawImage(tempCanvas, 0, 0);
     };
 
     resizeCanvas();
@@ -50,19 +63,29 @@ const DrawingCanvas = ({ roomId, socket }) => {
       const img = new Image();
       img.onload = () => {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(img, 0, 0);
-      };
-      img.onerror = () => {
-        // If image fails to load, set white background
         context.fillStyle = 'white';
         context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(img, 0, 0);
       };
       img.src = savedCanvas;
     } else {
-      // Set white background for new canvas
+      // Only set white background if no saved data
       context.fillStyle = 'white';
       context.fillRect(0, 0, canvas.width, canvas.height);
     }
+    
+    // हर drawing के बाद save होता है
+    const stopDrawing = () => {
+      if (!isDrawing) return;
+      setIsDrawing(false);
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      context.beginPath();
+      
+      // Save canvas state after drawing
+      const canvasData = canvas.toDataURL();
+      localStorage.setItem(`canvas-${roomId}`, canvasData);
+    };
 
     window.addEventListener('resize', resizeCanvas);
 
@@ -204,18 +227,6 @@ const DrawingCanvas = ({ roomId, socket }) => {
         }
       });
     }
-  };
-
-  const stopDrawing = () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    context.beginPath();
-    
-    // Save canvas state after drawing
-    const canvasData = canvas.toDataURL();
-    localStorage.setItem(`canvas-${roomId}`, canvasData);
   };
 
   const clearCanvas = () => {

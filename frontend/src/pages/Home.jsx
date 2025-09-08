@@ -33,10 +33,10 @@ const Home = () => {
         { opacity: 0, y: -50 },
         { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
       );
-
+  
     if (socket) {
       socket.emit('user-online', user.id);
-
+  
       socket.on('user-status-changed', (data) => {
         setUsers(prevUsers => 
           prevUsers.map(u => 
@@ -44,22 +44,30 @@ const Home = () => {
           )
         );
       });
-
+  
       socket.on('active-users', (activeUserIds) => {
+        console.log('Active users received:', activeUserIds); // Debug log add करें
         setUsers(prevUsers => 
           prevUsers.map(u => ({ ...u, isOnline: activeUserIds.includes(u._id) }))
         );
       });
-
+  
       socket.on('collaboration-request', (data) => {
+        console.log('Received collaboration request:', data);
+        console.log('Sender ID from data:', data.senderId);
         setRequestData(data);
         setShowRequest(true);
       });
 
+      socket.on('room-invitation', (data) => {
+        setRequestData(data);
+        setShowRequest(true);
+      });
+  
       socket.on('collaboration-accepted', ({ roomId }) => {
         navigate(`/collaboration/${roomId}`);
       });
-
+  
       socket.on('collaboration-rejected', ({ requestId }) => {
         console.log('Request rejected:', requestId);
         setPendingRequests(prev => {
@@ -77,7 +85,7 @@ const Home = () => {
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 3000);
       });
-
+  
       socket.on('collaboration-cancelled', ({ receiverName }) => {
         setPendingRequests(prev => {
           const updated = { ...prev };
@@ -93,14 +101,16 @@ const Home = () => {
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 3000);
       });
-
+  
       return () => {
-        socket.off('user-status-changed');
-        socket.off('active-users');
-        socket.off('collaboration-request');
-        socket.off('collaboration-accepted');
-        socket.off('collaboration-rejected');
-        socket.off('collaboration-cancelled');
+        if (socket) { // Cleanup में भी null check add करें
+          socket.off('user-status-changed');
+          socket.off('active-users');
+          socket.off('collaboration-request');
+          socket.off('collaboration-accepted');
+          socket.off('collaboration-rejected');
+          socket.off('collaboration-cancelled');
+        }
       };
     }
   }, [socket, navigate, user.id]);
@@ -132,7 +142,7 @@ const Home = () => {
         receiverName: receiver.name,
         requestId
       });
-
+  
       setPendingRequests(prev => ({
         ...prev,
         [requestId]: {

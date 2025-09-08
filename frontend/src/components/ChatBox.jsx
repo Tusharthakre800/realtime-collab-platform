@@ -3,9 +3,13 @@ import { gsap } from 'gsap';
 
 const ChatBox = ({ messages, onSendMessage, isTyping }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const messageRefs = useRef([]);
+  const emojiPickerRef = useRef(null);
+
+  const commonEmojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '❤️', '🔥', '🎉', '😢', '😡', '👋', '🙏', '✅', '❌', '🚀', '🌟', '💫', '✨', '💕', '💖', '💝', '🎈', '🎊', '🌈', '☀️', '🌙', '⭐', '💪', '🤝', '🙌', '👏'];
 
   useEffect(() => {
     gsap.fromTo(chatContainerRef.current, 
@@ -15,11 +19,23 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
   }, []);
 
   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
       const newMessageRef = messageRefs.current[messages.length - 1];
-      if (newMessageRef) {
+      if (newMessageRef && lastMessage) {
         gsap.fromTo(newMessageRef,
-          { opacity: 0, x: -20, scale: 0.9 },
+          { opacity: 0, x: lastMessage.isSent ? 20 : -20, scale: 0.9 },
           { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
         );
       }
@@ -36,6 +52,7 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
     if (newMessage.trim()) {
       onSendMessage(newMessage.trim());
       setNewMessage('');
+      setShowEmojiPicker(false);
       
       gsap.to('.send-btn', {
         scale: 0.9,
@@ -47,6 +64,11 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
     }
   };
 
+  const handleEmojiSelect = (emoji) => {
+    setNewMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
   return (
     <div ref={chatContainerRef} className="h-full flex flex-col bg-[#f8fafc] rounded-lg">
       <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] rounded-t-lg text-white px-4 py-3 shadow-sm">
@@ -56,7 +78,7 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
       <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[#f1f5f9]">
         {messages.map((message, index) => (
           <div 
-            key={message.id} 
+            key={message.id || index} 
             ref={el => messageRefs.current[index] = el}
             className={`flex ${message.isSent ? 'justify-end' : 'justify-start'} mb-3`}
           >
@@ -69,8 +91,8 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
               )}
               <div className={`px-4 py-2.5 rounded-2xl shadow-sm ${
                 message.isSent 
-                  ? 'bg-gradient-to-r from-[#667eea] to-[#f093fb] text-white rounded-br-md' 
-                  : 'bg-white text-gray-800 border border-[#e2e8f0] rounded-bl-md'
+                  ? 'bg-gradient-to-r from-[#667eea] to-[#f093fb] text-white rounded-br-md rounded-tl-2xl' 
+                  : 'bg-white text-gray-800 border border-[#e2e8f0] rounded-bl-md rounded-tr-2xl'
               }`}>
                 <p className="text-sm leading-relaxed break-words">{message.text}</p>
                 {message.isSent && (
@@ -100,13 +122,40 @@ const ChatBox = ({ messages, onSendMessage, isTyping }) => {
 
       <form onSubmit={handleSubmit} className="border-t border-[#e2e8f0] bg-white p-4">
         <div className="flex space-x-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 border border-[#e2e8f0] rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all text-sm"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="w-full border border-[#e2e8f0] rounded-xl px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#667eea] transition-colors text-xl"
+            >
+              😊
+            </button>
+            
+            {showEmojiPicker && (
+              <div 
+                ref={emojiPickerRef}
+                className="absolute bottom-full mb-2 right-0 bg-white border border-[#e2e8f0] rounded-lg shadow-lg p-2 grid grid-cols-4 gap-1 z-10"
+              >
+                {commonEmojis.map((emoji, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleEmojiSelect(emoji)}
+                    className="text-xl p-2 hover:bg-[#f1f5f9] rounded transition-colors"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             className="send-btn bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-2 rounded-xl hover:from-[#5a6fd8] hover:to-[#6a4190] transition-all duration-200 shadow-sm"
