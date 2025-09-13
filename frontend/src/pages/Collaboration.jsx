@@ -40,16 +40,16 @@ const Collaboration = () => {
   // Enhanced useEffect for socket connection and room joining
   useEffect(() => {
     if (socket && socket.connected) {
-      console.log('✅ Socket connected, joining room:', roomId);
+      // console.log('✅ Socket connected, joining room:', roomId);
       socket.emit('join-room', roomId);
       socket.emit('get-available-users');
       socket.emit('get-room-users', { roomId });
       socket.emit('get-active-users'); // Add this for real-time user status
     } else if (socket) {
-      console.log('⏳ Waiting for socket connection...');
+      // console.log('⏳ Waiting for socket connection...');
       const checkConnection = setInterval(() => {
         if (socket.connected) {
-          console.log('✅ Socket now connected, joining room:', roomId);
+          // console.log('✅ Socket now connected, joining room:', roomId);
           socket.emit('join-room', roomId);
           socket.emit('get-available-users');
           socket.emit('get-room-users', { roomId });
@@ -150,7 +150,7 @@ const Collaboration = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isSent: true
     };
-    setMessages(prev => [...prev, message]);
+    // setMessages(prev => [...prev, message]);
     socket.emit('chat-message', { roomId, message });
   };
 

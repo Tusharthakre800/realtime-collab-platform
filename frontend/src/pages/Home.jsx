@@ -53,8 +53,8 @@ const Home = () => {
       });
   
       socket.on('collaboration-request', (data) => {
-        console.log('Received collaboration request:', data);
-        console.log('Sender ID from data:', data.senderId);
+        // console.log('Received collaboration request:', data);
+        // console.log('Sender ID from data:', data.senderId);
         setRequestData(data);
         setShowRequest(true);
       });

@@ -68,16 +68,16 @@ const CollaborationRequest = ({ requestData, onClose, name, type = 'collaboratio
                             requestData?.from || 
                             requestData?.inviterId ||
                             requestData?.inviter?.id;
-            
-            console.log('🔄 Accept collaboration debug:', {
-              senderId,
-              receiverId: user.id,
-              requestDataStructure: requestData,
-              extractionPath: Object.keys(requestData || {})
-            });
+
+            // console.log('🔄 Accept collaboration debug:', {
+            //   senderId,
+            //   receiverId: user.id,
+            //   requestDataStructure: requestData,
+            //   extractionPath: Object.keys(requestData || {})
+            // });
             
             if (!senderId) {
-              console.error('❌ Sender ID is missing in requestData:', requestData);
+              // console.error('❌ Sender ID is missing in requestData:', requestData);
               alert('Error: Cannot accept collaboration - sender information missing');
               return;
             }
