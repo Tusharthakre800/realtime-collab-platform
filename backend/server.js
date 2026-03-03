@@ -54,6 +54,11 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   socket.on('user-online', (userId) => {
+    if (!userId) {
+      console.error('Invalid userId received in user-online event:', userId);
+      return;
+    }
+
     // Convert userId to string for consistency
     const userIdStr = userId.toString();
     activeUsers.set(userIdStr, socket.id);
